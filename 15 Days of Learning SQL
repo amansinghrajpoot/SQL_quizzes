@@ -1,0 +1,34 @@
+with firstdate as (
+select min(SUBMISSION_DATE) from SUBMISSIONS)
+
+SELECT SUBMISSION_DATE,
+      (SELECT COUNT(DISTINCT HACKER_ID)
+       FROM SUBMISSIONS  SUB2
+       WHERE SUB2.SUBMISSION_DATE=SUB1.SUBMISSION_DATE
+             AND (SELECT COUNT(DISTINCT SUBMISSION_DATE)
+                  FROM SUBMISSIONS  SUB3
+                  WHERE SUB3.HACKER_ID=SUB2.HACKER_ID
+                        AND SUB3.SUBMISSION_DATE<SUB1.SUBMISSION_DATE) = SUB1.SUBMISSION_DATE - (select * from firstdate)) total_subs,
+
+       (SELECT HACKER_ID
+       FROM SUBMISSIONS  SUB4
+       WHERE SUB4.SUBMISSION_DATE=SUB1.SUBMISSION_DATE
+       and HACKER_ID in (
+                        SELECT DISTINCT HACKER_ID
+                          FROM SUBMISSIONS  SUB5
+                            WHERE SUB5.SUBMISSION_DATE = SUB4.SUBMISSION_DATE
+                                        AND (SELECT COUNT(DISTINCT SUBMISSION_DATE)
+                                        FROM SUBMISSIONS  SUB6
+                                         WHERE SUB6.HACKER_ID=SUB5.HACKER_ID
+                                          AND SUB6.SUBMISSION_DATE<SUB1.SUBMISSION_DATE) = SUB1.SUBMISSION_DATE - (select * from firstdate)
+                        )
+       GROUP BY HACKER_ID
+       ORDER BY COUNT(SUBMISSION_ID) DESC, HACKER_ID asc fetch first 1 row only )  HID,
+
+       (select name from HACKERS where HACKER_ID = (SELECT HACKER_ID from (select SUB4.HACKER_ID, count(SUBMISSION_ID)  sub_con
+       FROM SUBMISSIONS  SUB4
+       WHERE SUB4.SUBMISSION_DATE=SUB1.SUBMISSION_DATE
+       GROUP BY HACKER_ID
+       ORDER BY  sub_con desc, HACKER_ID asc  fetch first 1 row only ))) names
+
+FROM (SELECT DISTINCT SUBMISSION_DATE FROM SUBMISSIONS)  SUB1 order by SUBMISSION_DATE;
