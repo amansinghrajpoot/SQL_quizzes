@@ -1,0 +1,7 @@
+with root as (select min(level) from bst start with p is null connect by p = prior N order by level),
+     leaf as (select max(level) from bst start with p is null connect by p = prior N order by level)
+select  N, case when level = (select * from root) then 'Root' when level = (select * from leaf) then 'Leaf' else 'Inner' end
+from bst
+start with p is null
+           connect by p = prior N
+order by N;
