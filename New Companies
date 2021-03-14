@@ -1,0 +1,13 @@
+select c.company_code, c.founder,
+                     (select count( distinct lead_manager_code)
+                           from lead_manager l where l.company_code = c.company_code ) lmc,
+                     
+                     (select count(distinct senior_manager_code)
+                           from senior_manager s where s.company_code = c.company_code ) smc,
+                     
+                     (select count(distinct manager_code) 
+                           from manager m where m.company_code = c.company_code ) mc, 
+                     
+                     (select count(distinct employee_code)
+                           from employee e where e.company_code = c.company_code ) smc 
+from company c order by company_code ;
