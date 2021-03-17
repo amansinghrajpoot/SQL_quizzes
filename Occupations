@@ -1,0 +1,10 @@
+with dc as (select name, rownum ir from (select name from occupations where occupation = 'Doctor' order by name)),
+pf as (select name, rownum ir from (select name from occupations where occupation = 'Professor' order by name)),
+si as (select name, rownum ir from (select name from occupations where occupation = 'Singer' order by name)),
+ac as (select name, rownum ir from (select name from occupations where occupation = 'Actor' order by name)),
+mx as (select rownum lines from dual connect by rownum <= (select max(count(*)) from occupations group by occupation))
+select  (select name from dc where ir = d.lines)  Doctor,
+(select name from pf where ir = d.lines) Professor,
+(select name from si where ir = d.lines) Singer,
+(select name from ac where ir = d.lines) Actor
+from mx d;
